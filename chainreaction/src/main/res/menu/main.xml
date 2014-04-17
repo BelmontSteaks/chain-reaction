@@ -3,7 +3,8 @@
     tools:context="com.mweber.chainreaction.chainreaction.MainActivity" >
     
     <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+        android:title="@string/action_exit"
         android:orderInCategory="100"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:onClick="quit" />
 </menu>

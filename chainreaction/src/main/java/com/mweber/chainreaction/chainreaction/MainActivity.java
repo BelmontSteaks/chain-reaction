@@ -1,12 +1,20 @@
 package com.mweber.chainreaction.chainreaction;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -21,9 +29,10 @@ public class MainActivity extends Activity {
 
     Timer timer = new Timer();
     int screenX, screenY;
-    int level = 5;
+    int level = 3;
     int ballNumber = level * 10;
     List <ImageView> balls = new ArrayList<ImageView>();
+    List <DrawView> bangs = new ArrayList<DrawView>();
 
     int speedArray[] = new int[ballNumber];
     int locationX[] = new int[ballNumber];
@@ -32,6 +41,10 @@ public class MainActivity extends Activity {
     int imageYArray[] = new int[ballNumber];
     int directionX[] = new int[ballNumber];
     int directionY[] = new int[ballNumber];
+    int clicks = 0;
+    DrawView bang;
+    Rect intBang;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +57,33 @@ public class MainActivity extends Activity {
         screenX = size.x;
         screenY = size.y;
 
-        RelativeLayout canvas = new RelativeLayout(this);
+        final RelativeLayout layout = (RelativeLayout)findViewById(R.id.test);
+
+        bangs.add(new DrawView(this));
+        layout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (clicks < 1){
+                    int x = (int) motionEvent.getX();
+                    int y = (int) motionEvent.getY();
+
+                    //Why is this needed?!?!
+                    bangs.get(0).setImageResource(R.drawable.ic_launcher);
+
+                    bangs.get(0).setX(x);
+                    bangs.get(0).setY(y);
+
+                    intBang = new Rect();
+                    intBang.set(x, y, x+96, y+96);
+
+                    clicks++;
+                    layout.addView(bang);
+                }
+
+
+                return false;
+            }
+        });
 
         Random generator = new Random();
 
@@ -65,7 +104,7 @@ public class MainActivity extends Activity {
             imageXArray[i] = locationX[i];
             imageYArray[i] = locationY[i];
 
-            canvas.addView(balls.get(i));
+            layout.addView(balls.get(i));
 
         }
 
@@ -73,9 +112,6 @@ public class MainActivity extends Activity {
         TimerTask updateGame = new UpdateGameTask();
         timer.scheduleAtFixedRate(updateGame, 0, 1000/FPS);
 
-
-
-        setContentView(canvas);
     }
 
     @Override
@@ -104,12 +140,17 @@ public class MainActivity extends Activity {
 
     class UpdateGameTask extends TimerTask {
 
+
+
         @Override
         public void run() {
 
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
+                    bangs.add(new ImageView(this));
+                    bangs.get(i).setImageResource(R.drawable.ic_launcher);
 
                     for (int i=0; i < balls.size(); i++){
 
@@ -128,25 +169,27 @@ public class MainActivity extends Activity {
                                 || imageYArray[i] < 0){
                             directionY[i] = directionY[i] * -1;
                         }
+
+                        int ballLeftBound = imageXArray[i];
+                        int ballRightBound = imageXArray[i] + balls.get(i).getWidth();
+                        int ballTopBound = imageYArray[i];
+                        int ballBottomBound = imageYArray[i] + balls.get(i).getHeight();
+
+                        Rect thisBall = new Rect();
+                        thisBall.set(ballLeftBound, ballTopBound, ballRightBound, ballBottomBound);
+
+                        if(clicks > 0){
+                            for (int j=0; j < bangs.size(); j++){
+                                intBang.set(bangs.get(j).getX(), bangs.get(j).getY(), )
+                                if (thisBall.intersect(intBang)){
+                                    balls.get(i).setVisibility(View.GONE);
+                                    bangs.add(new DrawView(MainActivity.this));
+
+                                }
+                            }
+
+                        }
                     }
-
-                    /*for (int i=0; i < balls.size(); i++){
-
-
-                        imageXArray[i] += (speedArray[i] * directionXArray[i]);
-                        imageYArray[i] += (speedArray[i] * directionYArray[i]);
-
-                        balls.get(i).setX(imageXArray[i]);
-                        balls.get(i).setY(imageYArray[i]);
-
-                        if (imageXArray[i] + balls.get(i).getWidth() > screenX || imageXArray[i] < 0){
-                            directionXArray[i] = directionXArray[i] * -1;
-                        }
-
-                        if (imageYArray[i] + balls.get(i).getHeight() > screenY - (screenY/12) || imageYArray[i] < 0){
-                            directionYArray[i] = directionYArray[i] * -1;
-                        }
-                    }*/
                 }
             });
 

@@ -213,3 +213,15 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+#############
+## Custom
+#############
+
+.gradle/
+.idea/
+gradle/
+.gitattributes
+*.iml
+*.bat
+gradlew
